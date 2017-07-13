@@ -30,4 +30,21 @@ describe Journey do
     journey.finish(exit_st)
     expect(journey.exit_station).to eq exit_st
   end
+
+  describe '#incomplete?' do
+    context 'touched in but not touched out' do
+      before { journey.start(:entrance) }
+
+      it 'is expected to be incomplete' do
+        expect(journey).to be_incomplete
+      end
+    end
+
+    context 'touched out after touching in' do
+      before { journey.finish(:exit) }
+      it 'is expected to be complete' do
+        expect(journey).not_to be_incomplete
+      end
+    end
+  end
 end

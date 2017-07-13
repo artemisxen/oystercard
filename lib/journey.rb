@@ -25,4 +25,8 @@ class Journey
     @journey_data[:fare] = MINIMUM_FARE
     @journey_data[:fare]
   end
+
+  def incomplete?
+    entry_station && !exit_station 
+  end
 end
