@@ -28,8 +28,18 @@ class Journey
     @journey_data[:fare]
   end
 
+  def reset
+    start(nil)
+    finish(nil)
+  end
+
   def incomplete?
-    puts "Entry station = #{entry_station.class}"
-    !(entry_station && exit_station)
+    if entry_station == nil && exit_station == nil
+      false
+    elsif entry_station && exit_station
+      false
+    else
+      true
+    end
   end
 end

@@ -9,6 +9,8 @@ describe Oystercard do
   let(:entrance) { "bank" }
   let(:exit_st) { "aldgate" }
   let(:journey) { double :journey }
+  let(:penalty_fare) { 6 }
+
 
   context '#initialize' do
     it 'has balance of 0' do
@@ -35,11 +37,6 @@ describe Oystercard do
   context 'station state' do
   before(:each) { oyster.top_up(amount) }
 
-  #  it 'touches in card' do
-  #    oyster.touch_in(entrance)
-  #    expect(oyster.journey.incomplete?).to be true
-  #  end
-
    it 'does not allow to touch in if balance is less than minimum fare' do
      expect{ oyster_empty.touch_in(entrance) }.to raise_error("Sorry, not enough balance!")
    end
@@ -52,19 +49,34 @@ describe Oystercard do
      before (:each) do
        oyster.top_up(amount)
        oyster.touch_in(entrance)
-       oyster.touch_out(exit_st)
      end
 
-    #  it 'touches out card' do
-    #    expect(oyster.journey.incomplete?).to be false
-    #  end
-
      it 'checks that a charge is made on touch out' do
-       expect{ oyster.touch_out(exit_st) }.to change {oyster.balance}.by (-described_class::MINIMUM_FARE)
+       expect{ oyster.touch_out(exit_st) }.to change {oyster.balance}.by (-1)
      end
 
      it 'creates a record in the journey history after touching in/out' do
+      oyster.touch_out(exit_st)
       expect(oyster.history.count).to eq 1
     end
+   end
+
+   context 'touch in after touching in' do
+     before { oyster.top_up(amount) }
+     before { oyster.touch_in(entrance) }
+
+     it 'is expected to charge penalty fare upon touching in' do
+       expect { oyster.touch_in(entrance) }.to change { oyster.balance }.by(-penalty_fare)
+     end
+   end
+
+   context 'touch out after touching out' do
+     before { oyster.top_up(amount) }
+     before { oyster.touch_in(entrance) }
+     before { oyster.touch_out(exit_st) }
+
+     it 'is expected to charge penalty fare upon touching out' do
+       expect { oyster.touch_out(exit_st) }.to change { oyster.balance }.by(-penalty_fare)
+     end
    end
 end

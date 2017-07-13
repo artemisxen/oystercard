@@ -32,6 +32,13 @@ describe Journey do
   end
 
   describe '#incomplete?' do
+
+    context 'both stations are nil' do
+      it 'expected not to be incomplete' do
+        expect(journey).not_to be_incomplete
+      end
+    end
+
     context 'touched in but not touched out' do
       before { journey.start(:entrance) }
       it 'is expected to be incomplete' do

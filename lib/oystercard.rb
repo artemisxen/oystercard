@@ -4,14 +4,16 @@ class Oystercard
 
   DEFAULT_BALANCE = 0
   LIMIT = 90
-  MINIMUM_FARE = 1
 
   attr_reader :balance, :journey, :history
 
-  def initialize
+  def initialize(journey_class = Journey)
     @balance = 0
     @history = []
-    @journey = Journey.new
+    @journey = journey_class.new
+    @penalty = journey_class::PENALTY_FARE
+    @minimum_fare = journey_class::MINIMUM_FARE
+    @fare = @minimum_fare
   end
 
   def top_up(amount)
@@ -20,15 +22,14 @@ class Oystercard
   end
 
   def touch_in(station)
-    raise "Sorry, not enough balance!" if balance < MINIMUM_FARE
+    finalise_journey if @journey.incomplete?
+    raise "Sorry, not enough balance!" if balance < @minimum_fare
     @journey.start(station)
   end
 
   def touch_out(station)
-    deduct(MINIMUM_FARE)
     @journey.finish(station)
-    @history << journey
-    journey_reset
+    finalise_journey
   end
 
   private
@@ -37,8 +38,25 @@ class Oystercard
     @balance -= fare
   end
 
-  def journey_reset
-    @journey.start(nil)
-    @journey.finish(nil)
+  def finalise_journey
+    finalise_incomplete_journey if @journey.incomplete?
+    deduct(@fare)
+    add_journey_to_history
+    @journey.reset
+    @fare = @minimum_fare
+  end
+
+  def finalise_incomplete_journey
+    complete_journey
+    @fare = @penalty
+  end
+
+  def complete_journey
+    @journey.start(nil) unless @journey.entry_station
+    @journey.finish(nil) unless @journey.exit_station
+  end
+
+  def add_journey_to_history
+    @history << journey
   end
 end
