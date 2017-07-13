@@ -34,16 +34,27 @@ describe Journey do
   describe '#incomplete?' do
     context 'touched in but not touched out' do
       before { journey.start(:entrance) }
-
       it 'is expected to be incomplete' do
         expect(journey).to be_incomplete
+      end
+
+      it 'is expected to return PENALTY_FARE' do
+        expect(journey.fare).to eq described_class::PENALTY_FARE
+      end
+    end
+
+    context 'touched out without touching in before' do
+      before { journey.finish(:exit_st) }
+      it 'is expected to return PENALTY_FARE' do
+        expect(journey.fare).to eq described_class::PENALTY_FARE
       end
     end
 
     context 'touched out after touching in' do
-      before { journey.finish(:exit) }
+      before { journey.start(:entrance) }
+      before { journey.finish(:exit_st) }
       it 'is expected to be complete' do
-        expect(journey).not_to be_incomplete
+        expect(journey.incomplete?).to be false
       end
     end
   end

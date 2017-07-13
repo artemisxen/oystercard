@@ -1,5 +1,6 @@
 class Journey
   MINIMUM_FARE = 1
+  PENALTY_FARE = 6
 
   def initialize
     @journey_data = Hash.new
@@ -23,10 +24,12 @@ class Journey
 
   def fare
     @journey_data[:fare] = MINIMUM_FARE
+    @journey_data[:fare] = PENALTY_FARE if incomplete?
     @journey_data[:fare]
   end
 
   def incomplete?
-    entry_station && !exit_station 
+    puts "Entry station = #{entry_station.class}"
+    !(entry_station && exit_station)
   end
 end
